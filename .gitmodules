@@ -1,0 +1,3 @@
+[submodule "k210-port/libk9"]
+	path = k210-port/libk9
+	url = https://github.com/44670/libk9

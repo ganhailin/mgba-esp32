@@ -362,7 +362,7 @@ bool GBALoadMB(struct GBA* gba, struct VFile* vf) {
 	gba->yankedRomSize = 0;
 	gba->memory.romSize = 0;
 	gba->memory.romMask = 0;
-	gba->romCrc32 = doCrc32(gba->memory.wram, gba->pristineRomSize);
+	gba->romCrc32 = 'K210';//doCrc32(gba->memory.wram, gba->pristineRomSize);
 	if (gba->cpu && gba->memory.activeRegion == REGION_WORKING_RAM) {
 		gba->cpu->memory.setActiveRegion(gba->cpu, gba->cpu->gprs[ARM_PC]);
 	}
@@ -404,15 +404,18 @@ bool GBALoadROM(struct GBA* gba, struct VFile* vf) {
 	gba->yankedRomSize = 0;
 	gba->memory.romMask = toPow2(gba->memory.romSize) - 1;
 	gba->memory.mirroring = false;
-	gba->romCrc32 = doCrc32(gba->memory.rom, gba->memory.romSize);
+	gba->romCrc32 = 'K210'; //doCrc32(gba->memory.rom, gba->memory.romSize);
 	GBAHardwareInit(&gba->memory.hw, &((uint16_t*) gba->memory.rom)[GPIO_REG_DATA >> 1]);
 	GBAVFameDetect(&gba->memory.vfame, gba->memory.rom, gba->memory.romSize);
 	if (popcount32(gba->memory.romSize) != 1) {
 		// This ROM is either a bad dump or homebrew. Emulate flash cart behavior.
 #ifndef FIXED_ROM_BUFFER
+#ifndef K210
+		// on k210, the mapped buffer is always larger at 32MB
 		void* newRom = anonymousMemoryMap(SIZE_CART0);
 		memcpy(newRom, gba->memory.rom, gba->pristineRomSize);
 		gba->memory.rom = newRom;
+#endif
 #endif
 		gba->memory.romSize = SIZE_CART0;
 		gba->memory.romMask = SIZE_CART0 - 1;
@@ -484,7 +487,7 @@ void GBAApplyPatch(struct GBA* gba, struct Patch* patch) {
 	gba->memory.hw.gpioBase = &((uint16_t*) gba->memory.rom)[GPIO_REG_DATA >> 1];
 	gba->memory.romSize = patchedSize;
 	gba->memory.romMask = SIZE_CART0 - 1;
-	gba->romCrc32 = doCrc32(gba->memory.rom, gba->memory.romSize);
+	gba->romCrc32 = 'K210'; //doCrc32(gba->memory.rom, gba->memory.romSize);
 }
 
 void GBARaiseIRQ(struct GBA* gba, enum GBAIRQ irq, uint32_t cyclesLate) {

@@ -15,6 +15,7 @@
 #endif
 
 struct VFile* VFileOpen(const char* path, int flags) {
+
 #ifdef USE_VFS_FILE
 	const char* chflags;
 	switch (flags & O_ACCMODE) {
@@ -91,6 +92,8 @@ struct VFile* VFileOpen(const char* path, int flags) {
 		vf->seek(vf, vf->size(vf), SEEK_SET);
 	}
 	return vf;
+#elif defined(K210)
+	return 0;
 #else
 	return VFileOpenFD(path, flags);
 #endif

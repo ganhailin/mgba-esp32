@@ -195,7 +195,9 @@ void mCoreConfigMakePortable(const struct mCoreConfig* config) {
 
 void mCoreConfigDirectory(char* out, size_t outLength) {
 	struct VFile* portable;
-#ifdef _WIN32
+#ifdef K210
+	sprintf(out, "/");
+#elif defined(_WIN32)
 	wchar_t wpath[MAX_PATH];
 	wchar_t wprojectName[MAX_PATH];
 	MultiByteToWideChar(CP_UTF8, 0, projectName, -1, wprojectName, MAX_PATH);

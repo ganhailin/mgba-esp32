@@ -26,6 +26,7 @@ int ftostr_l(char* restrict str, size_t size, float f, locale_t locale) {
 #endif
 }
 
+/*
 #ifndef HAVE_STRTOF_L
 float strtof_l(const char* restrict str, char** restrict end, locale_t locale) {
 #ifdef HAVE_LOCALE
@@ -44,7 +45,7 @@ float strtof_l(const char* restrict str, char** restrict end, locale_t locale) {
 #endif
 }
 #endif
-
+*/
 int ftostr_u(char* restrict str, size_t size, float f) {
 #if HAVE_LOCALE
 	locale_t l = newlocale(LC_NUMERIC_MASK, "C", 0);

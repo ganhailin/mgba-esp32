@@ -472,14 +472,17 @@ uint32_t GBALoad32(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 		LOAD_BAD;
 		break;
 	}
-
+#if 0
 	if (cycleCounter) {
+
 		wait += 2;
 		if (address >> BASE_OFFSET < REGION_CART0) {
 			wait = GBAMemoryStall(cpu, wait);
 		}
 		*cycleCounter += wait;
+
 	}
+#endif
 	// Unaligned 32-bit loads are "rotated" so they make some semblance of sense
 	int rotate = (address & 3) << 3;
 	return ROR(value, rotate);
@@ -583,14 +586,17 @@ uint32_t GBALoad16(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 		value = (value >> ((address & 2) * 8)) & 0xFFFF;
 		break;
 	}
-
+#if 0
 	if (cycleCounter) {
+
 		wait += 2;
 		if (address >> BASE_OFFSET < REGION_CART0) {
 			wait = GBAMemoryStall(cpu, wait);
 		}
 		*cycleCounter += wait;
+		
 	}
+#endif
 	// Unaligned 16-bit loads are "unpredictable", but the GBA rotates them, so we have to, too.
 	int rotate = (address & 1) << 3;
 	return ROR(value, rotate);
@@ -686,14 +692,17 @@ uint32_t GBALoad8(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 		value = (value >> ((address & 3) * 8)) & 0xFF;
 		break;
 	}
-
+#if 0
 	if (cycleCounter) {
+
 		wait += 2;
 		if (address >> BASE_OFFSET < REGION_CART0) {
 			wait = GBAMemoryStall(cpu, wait);
 		}
 		*cycleCounter += wait;
+		
 	}
+#endif
 	return value;
 }
 
@@ -807,11 +816,13 @@ void GBAStore32(struct ARMCore* cpu, uint32_t address, int32_t value, int* cycle
 	}
 
 	if (cycleCounter) {
+#if 0
 		++wait;
 		if (address >> BASE_OFFSET < REGION_CART0) {
 			wait = GBAMemoryStall(cpu, wait);
 		}
 		*cycleCounter += wait;
+#endif
 	}
 }
 
@@ -907,7 +918,7 @@ void GBAStore16(struct ARMCore* cpu, uint32_t address, int16_t value, int* cycle
 		mLOG(GBA_MEM, GAME_ERROR, "Bad memory Store16: 0x%08X", address);
 		break;
 	}
-
+#if 0
 	if (cycleCounter) {
 		++wait;
 		if (address >> BASE_OFFSET < REGION_CART0) {
@@ -915,6 +926,7 @@ void GBAStore16(struct ARMCore* cpu, uint32_t address, int16_t value, int* cycle
 		}
 		*cycleCounter += wait;
 	}
+#endif
 }
 
 void GBAStore8(struct ARMCore* cpu, uint32_t address, int8_t value, int* cycleCounter) {
@@ -986,7 +998,7 @@ void GBAStore8(struct ARMCore* cpu, uint32_t address, int8_t value, int* cycleCo
 		mLOG(GBA_MEM, GAME_ERROR, "Bad memory Store8: 0x%08X", address);
 		break;
 	}
-
+#if 0
 	if (cycleCounter) {
 		++wait;
 		if (address >> BASE_OFFSET < REGION_CART0) {
@@ -994,6 +1006,7 @@ void GBAStore8(struct ARMCore* cpu, uint32_t address, int8_t value, int* cycleCo
 		}
 		*cycleCounter += wait;
 	}
+#endif
 }
 
 uint32_t GBAView32(struct ARMCore* cpu, uint32_t address) {
@@ -1395,7 +1408,7 @@ uint32_t GBALoadMultiple(struct ARMCore* cpu, uint32_t address, int mask, enum L
 		LDM_LOOP(LOAD_BAD);
 		break;
 	}
-
+#if 0
 	if (cycleCounter) {
 		++wait;
 		if (address >> BASE_OFFSET < REGION_CART0) {
@@ -1403,6 +1416,7 @@ uint32_t GBALoadMultiple(struct ARMCore* cpu, uint32_t address, int mask, enum L
 		}
 		*cycleCounter += wait;
 	}
+#endif
 
 	if (direction & LSM_B) {
 		address -= offset;
@@ -1508,14 +1522,17 @@ uint32_t GBAStoreMultiple(struct ARMCore* cpu, uint32_t address, int mask, enum 
 		STM_LOOP(STORE_BAD);
 		break;
 	}
-
+#if 0
 	if (cycleCounter) {
+
+
 		if (address >> BASE_OFFSET < REGION_CART0) {
 			wait = GBAMemoryStall(cpu, wait);
 		}
 		*cycleCounter += wait;
+		
 	}
-
+#endif
 	if (direction & LSM_B) {
 		address -= offset;
 	}
@@ -1570,6 +1587,7 @@ void GBAAdjustWaitstates(struct GBA* gba, uint16_t parameters) {
 }
 
 int32_t GBAMemoryStall(struct ARMCore* cpu, int32_t wait) {
+#if 0
 	struct GBA* gba = (struct GBA*) cpu->master;
 	struct GBAMemory* memory = &gba->memory;
 
@@ -1612,6 +1630,9 @@ int32_t GBAMemoryStall(struct ARMCore* cpu, int32_t wait) {
 	// The next |loads|S waitstates disappear entirely, so long as they're all in a row
 	cpu->cycles -= (s - 1) * loads;
 	return wait;
+#else
+	return 0;
+#endif
 }
 
 void GBAMemorySerialize(const struct GBAMemory* memory, struct GBASerializedState* state) {
