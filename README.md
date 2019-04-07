@@ -21,8 +21,8 @@ make -j8
 Step 3: flash to board
 ```
 Linux:
-python(3) kflash.py -b 921600 -p /dev/ttyUSBXXX -B goE -t YOUR_REPO_PATH/k210-port/build/mgba.bin
+python(3) kflash.py -b 921600 -p /dev/ttyUSBX -B goE -t YOUR_REPO_PATH/k210-port/build/mgba.bin
 
 Windows:
-python kflash.py -b 921600 -p COM15 -B goE -t mgba/k210-port/build/mgba.bin
+python kflash.py -b 921600 -p COMXX -B goE -t YOUR_REPO_PATH/k210-port/build/mgba.bin
 ```
