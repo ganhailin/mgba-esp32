@@ -19,6 +19,10 @@ CXX_GUARD_START
 #include <mgba/internal/gba/vfame.h>
 #include <mgba/internal/gba/matrix.h>
 
+extern uint32_t (*ext_read32)(void* addr);
+extern uint16_t (*ext_read16)(void* addr);
+extern uint8_t (*ext_read8)(void* addr);
+
 enum GBAMemoryRegion {
 	REGION_BIOS = 0x0,
 	REGION_WORKING_RAM = 0x2,

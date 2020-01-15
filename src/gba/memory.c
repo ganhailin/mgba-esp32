@@ -17,6 +17,10 @@
 #include <mgba-util/memory.h>
 #include <mgba-util/vfs.h>
 
+uint32_t (*ext_read32)(void* addr)=NULL;
+uint16_t (*ext_read16)(void* addr)=NULL;
+uint8_t (*ext_read8)(void* addr)=NULL;
+
 #define IDLE_LOOP_THRESHOLD 10000
 
 mLOG_DEFINE_CATEGORY(GBA_MEM, "GBA Memory", "gba.memory");
@@ -652,17 +656,34 @@ uint32_t GBALoad8(struct ARMCore* cpu, uint32_t address, int* cycleCounter) {
 	case REGION_CART1_EX:
 	case REGION_CART2:
 	case REGION_CART2_EX:
-		wait = memory->waitstatesNonseq16[address >> BASE_OFFSET];
-		if ((address & (SIZE_CART0 - 1)) < memory->romSize) {
-			value = ((uint8_t*) memory->rom)[address & (SIZE_CART0 - 1)];
-		} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) {
-			value = ((uint8_t*) memory->rom)[address & memory->romMask];
-		} else if (memory->vfame.cartType) {
-			value = GBAVFameGetPatternValue(address, 8);
-		} else {
-			mLOG(GBA_MEM, GAME_ERROR, "Out of bounds ROM Load8: 0x%08X", address);
-			value = (address >> 1) & 0xFF;
+		if(ext_read8)
+		{
+			wait = memory->waitstatesNonseq16[address >> BASE_OFFSET];
+			if ((address & (SIZE_CART0 - 1)) < memory->romSize) {
+				value = ext_read8(((uint8_t*) memory->rom)+(address & (SIZE_CART0 - 1)));
+			} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) {
+				value = ext_read8(((uint8_t*) memory->rom)+(address & memory->romMask));
+			} else if (memory->vfame.cartType) {
+				value = GBAVFameGetPatternValue(address, 8);
+			} else {
+				mLOG(GBA_MEM, GAME_ERROR, "Out of bounds ROM Load8: 0x%08X", address);
+				value = (address >> 1) & 0xFF;
+			}
+		}else
+		{
+			wait = memory->waitstatesNonseq16[address >> BASE_OFFSET];
+			if ((address & (SIZE_CART0 - 1)) < memory->romSize) {
+				value = ((uint8_t*) memory->rom)[address & (SIZE_CART0 - 1)];
+			} else if (memory->mirroring && (address & memory->romMask) < memory->romSize) {
+				value = ((uint8_t*) memory->rom)[address & memory->romMask];
+			} else if (memory->vfame.cartType) {
+				value = GBAVFameGetPatternValue(address, 8);
+			} else {
+				mLOG(GBA_MEM, GAME_ERROR, "Out of bounds ROM Load8: 0x%08X", address);
+				value = (address >> 1) & 0xFF;
+			}
 		}
+		
 		break;
 	case REGION_CART_SRAM:
 	case REGION_CART_SRAM_MIRROR:
@@ -1668,6 +1689,7 @@ void _pristineCow(struct GBA* gba) {
 }
 
 void GBAPrintFlush(struct GBA* gba) {
+	printf("unsported func%s\r\n",__func__);
 	if (!gba->memory.agbPrintBuffer) {
 		return;
 	}

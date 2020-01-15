@@ -48,7 +48,12 @@ void GBAVFameInit(struct GBAVFameCart* cart) {
 	cart->romMode = -1;
 	cart->acceptingModeChange = false;
 }
-
+static int memncmp(const void* p1,const void* p2,uint32_t size){
+	for(int i=0;i<size;i++)
+		if((*((uint8_t*)p1+i))!=(*((uint8_t*)p2+i)))
+			return 1;
+	return 0;
+}
 void GBAVFameDetect(struct GBAVFameCart* cart, uint32_t* rom, size_t romSize) {
 	cart->cartType = VFAME_NO;
 
@@ -57,21 +62,43 @@ void GBAVFameDetect(struct GBAVFameCart* cart, uint32_t* rom, size_t romSize) {
 	if (romSize == 0x2000000) { // the deprotected dumps are 32MB but no real VF games are this size
 		return;
 	}
+	if(ext_read32){
+		printf("using extren read32\r\n");
+		uint32_t readbuff[4];
+		for(int i=0;i<4;i++)readbuff[i]=ext_read32(rom+((0x57+i)<<2));
+		struct GBACartridge buffgc;
+		for(int i=0;i<sizeof(struct GBACartridge)/4;i++)
+			*(((uint32_t*)&buffgc)+i)=ext_read32(rom+(i<<2));
+		printf("will memcmp %p to %p\r\n",INIT_SEQUENCE, readbuff);
+		if (memcmp(INIT_SEQUENCE, readbuff, sizeof(INIT_SEQUENCE)) == 0 || memcmp("\0LORD\0WORD\0\0AKIJ", &buffgc.title, 16) == 0) {
+			cart->cartType = VFAME_STANDARD;
+			mLOG(GBA_MEM, INFO, "Vast Fame game detected");
+		}
+		// This game additionally operates with a different set of SRAM modes
+		// Its initialisation seems to be identical so the difference must be in the cart HW itself
+		// Other undumped games may have similar differences
+		if (memcmp("George Sango", &buffgc.title, 12) == 0) {
+			cart->cartType = VFAME_GEORGE;
+			mLOG(GBA_MEM, INFO, "George mode");
+		}
 
-	// Most games have the same init sequence in the same place
-	// but LOTR/Mo Jie Qi Bing doesn't, probably because it's based on the Kiki KaiKai engine, so just detect based on its title
-	if (memcmp(INIT_SEQUENCE, &rom[0x57], sizeof(INIT_SEQUENCE)) == 0 || memcmp("\0LORD\0WORD\0\0AKIJ", &((struct GBACartridge*) rom)->title, 16) == 0) {
-		cart->cartType = VFAME_STANDARD;
-		mLOG(GBA_MEM, INFO, "Vast Fame game detected");
+	}else
+	{
+		// Most games have the same init sequence in the same place
+		// but LOTR/Mo Jie Qi Bing doesn't, probably because it's based on the Kiki KaiKai engine, so just detect based on its title
+		if (memcmp(INIT_SEQUENCE, &rom[0x57], sizeof(INIT_SEQUENCE)) == 0 || memcmp("\0LORD\0WORD\0\0AKIJ", &((struct GBACartridge*) rom)->title, 16) == 0) {
+			cart->cartType = VFAME_STANDARD;
+			mLOG(GBA_MEM, INFO, "Vast Fame game detected");
+		}
+		// This game additionally operates with a different set of SRAM modes
+		// Its initialisation seems to be identical so the difference must be in the cart HW itself
+		// Other undumped games may have similar differences
+		if (memcmp("George Sango", &((struct GBACartridge*) rom)->title, 12) == 0) {
+			cart->cartType = VFAME_GEORGE;
+			mLOG(GBA_MEM, INFO, "George mode");
+		}
 	}
-
-	// This game additionally operates with a different set of SRAM modes
-	// Its initialisation seems to be identical so the difference must be in the cart HW itself
-	// Other undumped games may have similar differences
-	if (memcmp("George Sango", &((struct GBACartridge*) rom)->title, 12) == 0) {
-		cart->cartType = VFAME_GEORGE;
-		mLOG(GBA_MEM, INFO, "George mode");
-	}
+	
 }
 
 // This is not currently being used but would be called on ROM reads

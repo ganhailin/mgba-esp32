@@ -135,17 +135,23 @@ struct GBACore {
 	struct mDebuggerPlatform* debuggerPlatform;
 	struct mCheatDevice* cheatDevice;
 };
-
+#define __DEBUG__
+#ifdef __DEBUG__
+#define __DEBUG_LINEFUNC__ printf("%s:%s:%d\r\n",__FILE__,__func__,__LINE__)
+#endif
 static bool _GBACoreInit(struct mCore* core) {
 	struct GBACore* gbacore = (struct GBACore*) core;
-
+	__DEBUG_LINEFUNC__;
 	struct ARMCore* cpu = anonymousMemoryMap(sizeof(struct ARMCore));
+	__DEBUG_LINEFUNC__;
 	struct GBA* gba = anonymousMemoryMap(sizeof(struct GBA));
+	__DEBUG_LINEFUNC__;
 	if (!cpu || !gba) {
 		free(cpu);
 		free(gba);
 		return false;
 	}
+	__DEBUG_LINEFUNC__;
 	core->cpu = cpu;
 	core->board = gba;
 	core->timing = &gba->timing;
@@ -918,11 +924,18 @@ struct mCore* GBACoreCreate(void) {
 	struct GBACore* gbacore = malloc(sizeof(*gbacore));
 	struct mCore* core = &gbacore->d;
 	memset(&core->opts, 0, sizeof(core->opts));
+	__DEBUG_LINEFUNC__;
 	core->cpu = NULL;
 	core->board = NULL;
 	core->debugger = NULL;
+	printf("maxpath=%d",PATH_MAX);
+	printf("initpt:%p\r\n",_GBACoreInit);
 	core->init = _GBACoreInit;
+	printf("initpt:%p\r\n",core->init);
+	printf("deinitpt:%p\r\n",_GBACoreDeinit);
 	core->deinit = _GBACoreDeinit;
+	printf("deinitpt:%p\r\n",core->deinit);
+	printf("offset=%d\r\n",((uint32_t)&(core->init))-(uint32_t)core);
 	core->platform = _GBACorePlatform;
 	core->setSync = _GBACoreSetSync;
 	core->loadConfig = _GBACoreLoadConfig;
