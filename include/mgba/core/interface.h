@@ -44,6 +44,7 @@ static inline color_t mColorFrom555(uint16_t value) {
 	color |= (value & 0x001F) << 11;
 	color |= (value & 0x03E0) << 1;
 	color |= (value & 0x7C00) >> 10;
+	color = ((color&0xff)<<8)|((color>>8)&0xff);
 #else
 	color_t color = value;
 #endif

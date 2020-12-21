@@ -455,7 +455,7 @@ static void GBVideoSoftwareRendererWritePalette(struct GBVideoRenderer* renderer
 		r /= 31;
 		g /= 31;
 		b /= 31;
-		color = mColorFrom555(r | (g << 5) | (b << 10));
+		color = mColorFrom555(r | (g << 5) | (b << 10));	
 #else
 		r >>= 2;
 		g >>= 2;
@@ -463,6 +463,9 @@ static void GBVideoSoftwareRendererWritePalette(struct GBVideoRenderer* renderer
 		color = r | (g << 8) | (b << 16);
 #endif
 	}
+//#ifdef COLOR_16_BIT
+//	color = ((color&0xff)<<8)|((color>>8)&0xff);
+//#endif
 	softwareRenderer->palette[index] = color;
 
 	if (softwareRenderer->model & GB_MODEL_SGB && !index && GBRegisterLCDCIsEnable(softwareRenderer->lcdc)) {

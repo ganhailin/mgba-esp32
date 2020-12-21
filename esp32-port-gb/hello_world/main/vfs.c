@@ -41,7 +41,7 @@ struct VFileESP {
 	struct VFile d;
 
 	FIL fileObj;
-	void * mappt;
+
 };
 
 
@@ -132,29 +132,13 @@ int vfs_readcb(void* id,uint32_t addr,uint32_t size,void* buffer){
 static void* _vfESPMap(struct VFile* vf, size_t size, int flags) {
 	TRACE_1("_vfESPMap: %p, %d,flag:%d\r\n", __builtin_return_address(0), (int) size,flags);
 	struct VFileESP* vfESP = (struct VFileESP*) vf;
-	void * p=NULL;
-	vfESP->mappt=NULL;
-	if(size>2097152){
-    	ext_read32=smmu_read32;
-    	ext_read16=smmu_read16;
-    	ext_read8=smmu_read8;
-		p=smmu_map(vf,vfs_readcb,NULL,size,flags);
-	}else if(size<=64*1024){
-		vfESP->mappt=malloc(size);
-		p=vfESP->mappt;
-		if(!p)
-			_vfESPRead(vf,p,size);
-	}else{
-		p=smmu_getpool();
-		_vfESPRead(vf,p,size);
-	}
-	return p;
-	
+    ext_read32=smmu_read32;
+    ext_read16=smmu_read16;
+    ext_read8=smmu_read8;
+	return smmu_map(vf,vfs_readcb,NULL,size,flags);
 }
 
-static void _vfESPUnmap(struct VFile* vf, void* memory, size_t size) {
-	struct VFileESP* vfESP = (struct VFileESP*) vf;
-}
+static void _vfESPUnmap(struct VFile* vf, void* memory, size_t size) {}
 
 static void _vfESPTruncate(struct VFile* vf, size_t size) {}
 

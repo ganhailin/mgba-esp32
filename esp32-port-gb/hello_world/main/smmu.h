@@ -36,6 +36,5 @@ void* smmu_map(void* id,smmu_readcb r,smmu_writecb w,uint32_t size,enum SMMUFLAG
 uint32_t smmu_read32(void* addr);
 uint16_t smmu_read16(void* addr);
 uint8_t smmu_read8(void* addr);
-void* smmu_getpool();
-
+ 
 #endif

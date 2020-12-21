@@ -9,9 +9,6 @@ static void* smmu_pool=NULL;
 static uint32_t smmu_oc=0;
 volatile int lastaccessindex=0;
 #define smmu_printf printf
-
-
-
 int smmu_init()
 {
     smmu_oc++;
@@ -121,13 +118,4 @@ uint8_t smmu_read8(void* addr)
     uint32_t v=smmu_read32(addr32);
     uint8_t *vp=&v;
     return  vp[((uint32_t)addr)&3];
-}
-
-void* smmu_getpool()
-{
-    if(!isinited)
-        smmu_init();
-    if(!isinited)
-        return NULL;
-    return smmu_pool;
 }

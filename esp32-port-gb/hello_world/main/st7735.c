@@ -188,7 +188,7 @@ void ST7735_Init() {
     spi_device_interface_config_t devcfg={
 
 #ifdef CONFIG_LCD_OVERCLOCK
-        .clock_speed_hz=40*1000*1000,           //Clock out at 26 MHz
+        .clock_speed_hz=26*1000*1000,           //Clock out at 26 MHz
 #else
         .clock_speed_hz=10*1000*1000,           //Clock out at 10 MHz
 #endif
